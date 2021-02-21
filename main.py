@@ -3,7 +3,6 @@ import os
 import random
 import firebase_admin
 from firebase_admin import credentials, firestore
-from discord.ext import tasks
 import asyncio
 
 intents = discord.Intents.default()
@@ -84,11 +83,11 @@ def hit_obstacle():
   # Found from https://www.bmw.com/en/innovation/electric-car-facts.html
   # https://www.gm.com/electric-vehicles.html
   quiz_questions = [
-  ("Which country has the largest electric car market with over 1.2 million units sold in 2019","china"),
-  ("Which car company has vowed to launch 30 electric vehicles around the world by 2025?", "general motors"),
-  ("Which country gets 100 percent of it's electricity from clean, green hydroelectric power?", "albania"),
-  ("Which Scandanavian country has the most new percentage of electic cars sold worldwide? (55 percent)", "norway"),
-  ("Which country has the greatest number of charging stations per person, over 37,000 public charging stations total?","netherlands")
+  ("Which country has the largest electric car market with over 1.2 million units sold in 2019","China"),
+  ("Which car company has vowed to launch 30 electric vehicles around the world by 2025?", "General Motors"),
+  ("Which country gets 100 percent of it's electricity from clean, green hydroelectric power?", "Albania"),
+  ("Which Scandanavian country has the most new percentage of electic cars sold worldwide? (55 percent)", "Norway"),
+  ("Which country has the greatest number of charging stations per person, over 37,000 public charging stations total?","Netherlands")
 ]
   chosen = random.choice(quiz_questions)
   return chosen
@@ -101,17 +100,22 @@ async def wait_for_answer(player, channel, points, delayTF):
   sent_question = await channel.send(content = player.mention + " - " + q_n_a[0] )
   try:
     msg = await client.wait_for('message', check=lambda message: message.author == player, timeout=15)
-    if msg.content == q_n_a[1]:
+    if q_n_a[1].lower() in msg.content.lower():
       await sent_question.delete()
       await msg.delete()
       points[0]+=5
       return False
     else:
       setCoins(player.id, getCoins(player.id)+points[0])
-      await channel.send(content = "That'd the wrong answer :( Game over, your collected coins (**" +str(points[0])+"**<:rEVcoin:812771947054235678>) have been added to your account")
+      await channel.send(content = "That's the wrong answer :( The right answer was: **"+q_n_a[1]+"**. Better luck next time!")
+      await asyncio.sleep(2)
+      await channel.send(content = " Game over, your collected coins (**" +str(points[0])+"**<:rEVcoin:812771947054235678>) have been added to your account")
+      
   except asyncio.exceptions.TimeoutError:
     setCoins(player.id, getCoins(player.id)+points[0])
-    await channel.send(content = "You didn't answer in time :( Your collected coins (**" +str(points[0])+"**<:rEVcoin:812771947054235678>) have been added to your account")
+    await channel.send(content = "You didn't answer in time :( The right answer was: **"+q_n_a[1]+"**. Better luck next time!")
+    await asyncio.sleep(2)
+    await channel.send(content = "Your collected coins (**" +str(points[0])+"**<:rEVcoin:812771947054235678>) have been added to your account")
   return True
   
 async def create_game_frame(player, points, direction, game_matrix, channel, delayTF):
@@ -247,7 +251,6 @@ async def sendOrDelay(player, points, current, game_matrix, message, delayTF, ac
   embedVar = create_game_frame(player, points, current, game_matrix, message.channel, delayTF)
   if delayTF[0]:
     delayTF[0] = False
-    #await asyncio.sleep(15)
   await accept_decline.edit(embed=await embedVar)
 
 async def end_task(task):
@@ -284,7 +287,6 @@ async def on_message(message):
       delayTF = [False]
       count = 0.1
       client.loop.create_task(loop_for_game(accept_decline, points, player, current, game_matrix, message, delayTF, count))
-    
     
     if msg == "rev lead": # if lowercased message == rev lead, call our function and send as embed
       game_message = create_leaderboard(message.guild)

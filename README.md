@@ -1,5 +1,7 @@
 # rEVBot
 
+![logo](docs/images/rEVBot_Logo.jpg)
+
 ## 🌟 Inspiration
 As a result of the pandemic, teenagers and young adults have been unable to interact with each other in a safe and meaningful way. Humans need social interaction, but lately it’s been really hard to get that. Forty per cent of Canadians in general reported that their mental health has gotten worse in a recent survey done by the Canadian Mental Health Association. Especially with youth, it’s more important than ever to connect with each other in safe and nurturing virtual environments. On the other hand, environmental issues have become an increasingly important topic with the younger generation. EVs are an area with high untapped potential - in fact, electric vehicles made up only 0.2 percent of the total Canadian vehicle population in 2018. As a highly innovative and environmentally friendly technology, it’s more important than ever to spread awareness about EVs to a generation of environmentally passionate youth.
 
@@ -35,3 +37,4 @@ As a team, we’ve invested so much time into figuring out how to make rEVBot wo
 2. Soft-launch to market to get a small beta user-base.
 3. Update rEVBot based on user feedback and implement more advanced functions, including 24/7 functionality.
 
+![rEVcoin](docs/images/rEVcoin.png)

@@ -3,7 +3,7 @@
 rEVBot is a multipurpose Discord bot made to decrease the disconnect between teenagers and their peers while serving as a fun and environmentally educational medium. Written using Discord.py API and Firestore DB, it features an entertaining mini-game that spreads awareness and dispels misconceptions about electric vehicles, a leaderboard where users can engage in friendly competition against each other, and a “safe space” function that assigns coin penalties to the authors of insensitive messages!
 
 
-<img src="docs/images/rEVcoin.png" align="center" width="100" height="100">
+<img src="docs/images/rEVcoin.png" width="100" height="100">
 
 🔌 You can add rEVBot to your own Discord server through this [link](https://discord.com/api/oauth2/authorize?client_id=812549585632362506&permissions=8&scope=bot). Simply type `rev help`, and have fun with our features!
 
@@ -21,12 +21,13 @@ After hitting an obstacle:
 ![rEV hit obstacle](docs/images/up-hit-obstacle.png)
 
 `rev bal`: Check user’s personal balance, stored in Firestore.
+![rEVcoin Bal](docs/images/rev-bal.png)
 
 `rev lead`: Shows the top rEVcoin users in the server.
 
-![rEVcoin Bal](docs/images/rev-coin-bal.png)
+![rEVcoin Leaderboard](docs/images/rev-lead.png)
 
-<img src="docs/images/rEVBot_Logo.jpg" align="center" width="500" height="500">
+<img src="docs/images/rEVBot_Logo.jpg" width="500" height="500">
 
 ## 🤖 What's next for rEVBot 
 As a team, we’ve invested so much time into figuring out how to make rEVBot work, so we’re definitely going to be continuing to develop and hopefully launch it in the near future. With our MVP completed, our goals include:

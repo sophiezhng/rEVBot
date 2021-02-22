@@ -1,4 +1,9 @@
 # rEVBot
+
+![rEV UP](docs/images/rev-up.png)
+![rEV hit obstacle](docs/images/up-hit-obstacle.png)
+![rEVcoin Bal](docs/images/rev-coin-bal.png)
+
 <img src="docs/images/rEVBot_Logo.jpg" align="center" width="500" height="500">
 
 ## 🌟 Inspiration

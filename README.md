@@ -14,6 +14,7 @@ Our project is built using Python, discord.py, and Google Cloud Firestore. We bu
 ![rEV UP](docs/images/rev-up.png)
 
 After hitting an obstacle:
+
 ![rEV hit obstacle](docs/images/up-hit-obstacle.png)
 
 `rev bal`: Check user’s personal balance, stored in Firestore.

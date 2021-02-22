@@ -11,12 +11,13 @@ Our project is built using Python, discord.py, and Google Cloud Firestore. We bu
 
 `rev up`: A minigame where users need to react to rEVBot’s message and navigate their EV to dodge obstacles and collect rEVcoins. Should the user hit an obstacle, they will need to answer an EV-related question in order to continue.
 
+![rEV UP](docs/images/rev-up.png)
+![rEV hit obstacle](docs/images/up-hit-obstacle.png)
+
 `rev bal`: Check user’s personal balance, stored in Firestore.
 
 `rev lead`: Shows the top rEVcoin users in the server.
 
-![rEV UP](docs/images/rev-up.png)
-![rEV hit obstacle](docs/images/up-hit-obstacle.png)
 ![rEVcoin Bal](docs/images/rev-coin-bal.png)
 
 <img src="docs/images/rEVBot_Logo.jpg" align="center" width="500" height="500">

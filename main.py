@@ -33,19 +33,20 @@ penalties = [10,25,85,100]
 penaltiesDict = {10:"That's how many miles of gas you can save by using EVs!", 25:"That's how many minutes it takes to charge a certain percentage.", 85:"That's the percentage of EVs clean energy rate!", 100:" That's almost as many charging stations in Arkansa"}
 valuesDict = {0:" <:evcar:812739608709431327> ", 1:"    ", 2:" <:rEVcoin:812771947054235678> ", 3:"  :construction:  "}
 
-def getCoins(user_id):
-  doc_ref = db.collection(u'coin leaderboard').document(u'{}'.format(user_id))
+def getCoins(user):
+  doc_ref = db.collection(u'coin leaderboard').document(u'{}'.format(user.id))
   get_bal= doc_ref.get({u'balance'}).to_dict()
   if get_bal is not None:
     bal = get_bal.get('balance')
     return bal
   return 0
   
-def setCoins(user_id, new_bal):
-  doc_ref = db.collection(u'coin leaderboard').document(u'{}'.format(user_id))
-  doc_ref.set({
-    u'balance':new_bal,
-  })
+def setCoins(user, new_bal):
+  if user.bot == false:
+    doc_ref = db.collection(u'coin leaderboard').document(u'{}'.format(user.id))
+    doc_ref.set({
+      u'balance':new_bal,
+    })
 
 def matrixToString(game_matrix):
   gameval = ""
@@ -106,13 +107,13 @@ async def wait_for_answer(player, channel, points, delayTF):
       points[0]+=5
       return False
     else:
-      setCoins(player.id, getCoins(player.id)+points[0])
+      setCoins(player, getCoins(player)+points[0])
       await channel.send(content = "That's the wrong answer :( The right answer was: **"+q_n_a[1]+"**. Better luck next time!")
       await asyncio.sleep(2)
       await channel.send(content = " Game over, your collected coins (**" +str(points[0])+"**<:rEVcoin:812771947054235678>) have been added to your account")
       
   except asyncio.exceptions.TimeoutError:
-    setCoins(player.id, getCoins(player.id)+points[0])
+    setCoins(player, getCoins(player)+points[0])
     await channel.send(content = "You didn't answer in time :( The right answer was: **"+q_n_a[1]+"**. Better luck next time!")
     await asyncio.sleep(2)
     await channel.send(content = "Your collected coins (**" +str(points[0])+"**<:rEVcoin:812771947054235678>) have been added to your account")
@@ -152,7 +153,7 @@ async def create_game_frame(player, points, direction, game_matrix, channel, del
       game_value = matrixToString(game_matrix)
   else:
     game_value = "You veered off the road x.X"
-    setCoins(player.id, getCoins(player.id)+points[0])
+    setCoins(player, getCoins(player)+points[0])
     await channel.send(content = "You veered off the road :( Game over, your collected coins (**" +str(points[0])+"**<:rEVcoin:812771947054235678>) have been added to your account")
     delayTF[0] = True
   embedVar.add_field(name="Coins Collected:", value="**"+str(points[0])+"**<:rEVcoin:812771947054235678>", inline=False)
@@ -181,7 +182,7 @@ def create_leaderboard(guild): # def function to create and return embed
   lead_list=""
   membs =[]
   for mem in guild.members:
-    num_of_coins = getCoins(mem.id)
+    num_of_coins = getCoins(mem)
     if num_of_coins!=0:
       membs.append((mem.name, num_of_coins))
   membs.sort(key=lambda x: x[1],reverse=True)
@@ -213,7 +214,7 @@ def help():
 
 def get_bal_embed(user):
   embedVar = discord.Embed(title=f":zap: {user.name}'s rEVcoin Balance <:evcar:812739608709431327>", description=f"{user.mention} - Earn more by playing rEV UP with the `rev up` command!", color=0xFFFF00)
-  embedVar.add_field(name="Your Balance:", value="**"+str(getCoins(user.id))+"**<:rEVcoin:812771947054235678>", inline=False)
+  embedVar.add_field(name="Your Balance:", value="**"+str(getCoins(user))+"**<:rEVcoin:812771947054235678>", inline=False)
   return embedVar
 
 async def loop_for_game(accept_decline, points, player, current, game_matrix, message, delayTF, count):
@@ -270,19 +271,20 @@ async def on_message(message):
     if any(word in msg for word in bad_words):
       points_lost = random.choice(penalties)
       await message.reply("You have lost "+str(points_lost)+" <:rEVcoin:812771947054235678>. Fun fact: "+penaltiesDict[points_lost])
-      setCoins(message.author.id, getCoins(message.author.id)-points_lost)
+      setCoins(message.author, getCoins(message.author)-points_lost)
 
     if msg == "rev up":
       # save player id so other users can't interfere, only accept their reactions
       player = message.author
-      current = 0
-      points = [0]
-      #initial game matrix
-      game_matrix = [[valuesDict[3],valuesDict[2],valuesDict[1]], [valuesDict[1],valuesDict[1],valuesDict[1]], [valuesDict[1],valuesDict[1],valuesDict[1]],[valuesDict[2],valuesDict[3],valuesDict[3]],[valuesDict[1],valuesDict[1],valuesDict[1]],[valuesDict[1],valuesDict[1],valuesDict[1]],[valuesDict[1],valuesDict[0],valuesDict[1]]]
-      game_message = initializeMessage(game_matrix)
-      accept_decline = await message.channel.send(embed=game_message)
-      await accept_decline.add_reaction("⬅️")
-      await accept_decline.add_reaction("➡️")
+      if player.bot == false:
+        current = 0
+        points = [0]
+        #initial game matrix
+        game_matrix = [[valuesDict[3],valuesDict[2],valuesDict[1]], [valuesDict[1],valuesDict[1],valuesDict[1]], [valuesDict[1],valuesDict[1],valuesDict[1]],[valuesDict[2],valuesDict[3],valuesDict[3]],[valuesDict[1],valuesDict[1],valuesDict[1]],[valuesDict[1],valuesDict[1],valuesDict[1]],[valuesDict[1],valuesDict[0],valuesDict[1]]]
+        game_message = initializeMessage(game_matrix)
+        accept_decline = await message.channel.send(embed=game_message)
+        await accept_decline.add_reaction("⬅️")
+        await accept_decline.add_reaction("➡️")
       
       delayTF = [False]
       count = 0.1

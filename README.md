@@ -1,6 +1,6 @@
-# rEVBot
+# rEVBot 🤖
 
-## Invite rEVBot to your server [HERE](https://discord.com/api/oauth2/authorize?client_id=812549585632362506&permissions=339008&scope=bot) 🚗
+## Invite rEVBot to your server [here](https://discord.com/api/oauth2/authorize?client_id=812549585632362506&permissions=339008&scope=bot) 🚗
 
 Prefered if you don't run your own instance of the bot, use the join link above instead
 

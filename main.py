@@ -1,19 +1,26 @@
 import discord
-import os
 import random
 import firebase_admin
 from firebase_admin import credentials, firestore
 import asyncio
 
+from discord.ext import commands
+
+# ========= For Firestore (rev lead) ========= #
+
 intents = discord.Intents.default()
 intents.members = True
-client = discord.Client(intents=intents)
+client = commands.Bot(command_prefix='rev ', intents=intents)
+
+client.remove_command('help')
 
 path_to_json = "" # enter path to json certificate here to read and write to Firebase
 cred = credentials.Certificate(path_to_json)
 firebase_admin.initialize_app(cred)
 
 db = firestore.client()
+
+# ========= Global variables (aka hardcoded data aka dumb) ========= #
 
 sad_words = ["sad", "depressed", "unhappy", "angry", "miserable"]
 
@@ -26,12 +33,32 @@ starter_encouragements = [
   "You got this."
 ]
 
-evcar = "  <:evcar:812739608709431327>  " # Custom emotes
-revcoin = "  <:rEVcoin:812771947054235678>  "
-
 penalties = [10,25,85,100]
 penaltiesDict = {10:"That's how many miles of gas you can save by using EVs!", 25:"That's how many minutes it takes to charge a certain percentage.", 85:"That's the percentage of EVs clean energy rate!", 100:" That's almost as many charging stations in Arkansa"}
 valuesDict = {0:" <:evcar:812739608709431327> ", 1:"    ", 2:" <:rEVcoin:812771947054235678> ", 3:"  :construction:  "}
+
+# Custom emotes
+evcar = "  <:evcar:812739608709431327>  "
+revcoin = "  <:rEVcoin:812771947054235678>  "
+
+# ========= Rev help functions ========= #
+
+def revhelp():
+  embedVar = discord.Embed(title=":zap: List of rEVBot Features", description="Check out what features rEVBot has and what commands you can use!", color=0xFF7F50)
+  embedVar.add_field(name=":video_game: rEV Minigame", value="`rev up`: Dodge obstacles and collect rEVcoins! <:rEVcoin:812771947054235678>", inline=False)
+  embedVar.add_field(name=":coin: Your Balance", value="`rev bal`: Check your rEVcoin balance with this command! :coin:", inline=False)
+  embedVar.add_field(name=":medal: Server Leaderboard", value="`rev lead`: See the richest rEVcoin users in your server! :trophy:", inline=False)
+  embedVar.add_field(name=":desktop: Safe Space Feature", value="rEVBot servers are safe places. If you send a mean message, you'll lose <:rEVcoin:812771947054235678>!", inline=False)
+  return embedVar
+
+# ========= Rev bal functions ========= #
+
+def get_bal_embed(user):
+  embedVar = discord.Embed(title=f":zap: {user.name}'s rEVcoin Balance <:evcar:812739608709431327>", description=f"{user.mention} - Earn more by playing rEV UP with the `rev up` command!", color=0xFFFF00)
+  embedVar.add_field(name="Your Balance:", value="**"+str(getCoins(user))+"**<:rEVcoin:812771947054235678>", inline=False)
+  return embedVar
+
+# ========= Rev lead functions ========= #
 
 def getCoins(user):
   doc_ref = db.collection(u'coin leaderboard').document(u'{}'.format(user.id))
@@ -40,13 +67,49 @@ def getCoins(user):
     bal = get_bal.get('balance')
     return bal
   return 0
-  
+
 def setCoins(user, new_bal):
-  if user.bot == false:
+  if user.bot == False:
     doc_ref = db.collection(u'coin leaderboard').document(u'{}'.format(user.id))
-    doc_ref.set({
-      u'balance':new_bal,
-    })
+    if new_bal >= 0:
+      doc_ref.set({
+        u'balance':new_bal,
+      })
+    else:
+      doc_ref.set({
+        u'balance':0,
+      })
+
+def create_leaderboard(guild): # def function to create and return embed
+  limit = 10
+  embedVar = discord.Embed(title="", description="",color=0x00FFFF)
+  index = 0
+  lead_list=""
+  membs =[]
+  for mem in guild.members:
+    num_of_coins = getCoins(mem)
+    if num_of_coins!=0:
+      membs.append((mem.name, num_of_coins))
+  membs.sort(key=lambda x: x[1],reverse=True)
+  for mem in membs:
+    index +=1
+    if index > limit:
+      break
+    if index == 1:
+      lead_list += ":first_place:"
+    elif index == 2:
+      lead_list += ":second_place:"
+    elif index == 3:
+      lead_list += ":third_place:"
+    else:
+      lead_list += ":small_blue_diamond:"
+    lead_list += " **"+str(mem[1])+"** - "+mem[0]+"\n"
+  if lead_list=="":
+    lead_list = "There are no active rEVBot players on this server :( To get more coins, play `rev up` to gain more!"
+  embedVar.add_field(name=":zap:<:rEVcoin:812771947054235678>"+guild.name+"'s rEVcoin Leaderboard <:rEVcoin:812771947054235678>:zap:", value=lead_list, inline=False)
+  return embedVar
+
+# ========= Rev up functions ========= #
 
 def matrixToString(game_matrix):
   gameval = ""
@@ -61,14 +124,14 @@ def updateGame(carLocation, game_matrix):
   # returns number of coins gained, if -1 then hit obstacles
   coinsGained = 0
   if (game_matrix[5][carLocation]==valuesDict[2]):
-    coinsGained = 1
+    coinsGained = 2
   elif (game_matrix[5][carLocation]==valuesDict[3]):
     coinsGained = -1 #deal with hit obstacle some other way later
-  
+
   # update matrix
   for i in range(6,-1,-1):
     game_matrix[i] = game_matrix[i-1]
-  
+
   if (game_matrix[1][0]==valuesDict[1]) & (game_matrix[1][1]==valuesDict[1]) & (game_matrix[1][2]==valuesDict[1]) & (game_matrix[2][0]==valuesDict[1]) & (game_matrix[2][1]==valuesDict[1]) & (game_matrix[2][2]==valuesDict[1]):
     randomIndexes = [random.randint(1,3),random.randint(1,3),random.randint(1,3)]
     if (randomIndexes[0]==3) & (randomIndexes[1]==3) & (randomIndexes[2]==3):
@@ -79,6 +142,24 @@ def updateGame(carLocation, game_matrix):
   game_matrix[6][carLocation] = valuesDict[0]
 
   return coinsGained
+
+def newGameMatrix():
+
+  # index 5, 3, 1
+  game = [[],[valuesDict[1], valuesDict[1], valuesDict[1]],[valuesDict[1], valuesDict[1], valuesDict[1]],[],[valuesDict[1], valuesDict[1], valuesDict[1]],[valuesDict[1], valuesDict[1], valuesDict[1]],[valuesDict[1], valuesDict[0], valuesDict[1]]]
+
+  randomIndexes = [random.randint(1, 3), random.randint(1, 3), random.randint(1, 3)]
+  if (randomIndexes[0] == 3) & (randomIndexes[1] == 3) & (randomIndexes[2] == 3):
+    randomIndexes[random.randint(0, 2)] = random.randint(1, 2)
+  game[0] = [valuesDict[randomIndexes[0]], valuesDict[randomIndexes[1]],valuesDict[randomIndexes[2]]]
+
+  randomIndexes = [random.randint(1, 3), random.randint(1, 3), random.randint(1, 3)]
+  if (randomIndexes[0] == 3) & (randomIndexes[1] == 3) & (randomIndexes[2] == 3):
+    randomIndexes[random.randint(0, 2)] = random.randint(1, 2)
+  game[3] = [valuesDict[randomIndexes[0]], valuesDict[randomIndexes[1]], valuesDict[randomIndexes[2]]]
+
+  return game
+
 
 def hit_obstacle():
   # Found from https://www.bmw.com/en/innovation/electric-car-facts.html
@@ -104,21 +185,21 @@ async def wait_for_answer(player, channel, points, delayTF):
     if q_n_a[1].lower() in msg.content.lower():
       await sent_question.delete()
       await msg.delete()
-      points[0]+=5
+      points[0]+=1
       return False
     else:
       setCoins(player, getCoins(player)+points[0])
       await channel.send(content = "That's the wrong answer :( The right answer was: **"+q_n_a[1]+"**. Better luck next time!")
       await asyncio.sleep(2)
       await channel.send(content = " Game over, your collected coins (**" +str(points[0])+"**<:rEVcoin:812771947054235678>) have been added to your account")
-      
+
   except asyncio.exceptions.TimeoutError:
     setCoins(player, getCoins(player)+points[0])
     await channel.send(content = "You didn't answer in time :( The right answer was: **"+q_n_a[1]+"**. Better luck next time!")
     await asyncio.sleep(2)
     await channel.send(content = "Your collected coins (**" +str(points[0])+"**<:rEVcoin:812771947054235678>) have been added to your account")
   return True
-  
+
 async def create_game_frame(player, points, direction, game_matrix, channel, delayTF):
   em_space = " "
   en_space = " "
@@ -175,48 +256,6 @@ def updateCarPosition(game_matrix, position):
   else:
     game_matrix[6][2] = valuesDict[0]
 
-def create_leaderboard(guild): # def function to create and return embed  
-  limit = 10
-  embedVar = discord.Embed(title="", description="",color=0x00FFFF)
-  index = 0
-  lead_list=""
-  membs =[]
-  for mem in guild.members:
-    num_of_coins = getCoins(mem)
-    if num_of_coins!=0:
-      membs.append((mem.name, num_of_coins))
-  membs.sort(key=lambda x: x[1],reverse=True)
-  for mem in membs:
-    index +=1
-    if index > limit:
-      break
-    if index == 1:
-      lead_list += ":first_place:"
-    elif index == 2:
-      lead_list += ":second_place:"
-    elif index == 3:
-      lead_list += ":third_place:"
-    else:
-      lead_list += ":small_blue_diamond:"
-    lead_list += " **"+str(mem[1])+"** - "+mem[0]+"\n"
-  if lead_list=="":
-    lead_list = "There are no active rEVBot players on this server :( To get more coins, play `rev up` to gain more!"
-  embedVar.add_field(name=":zap:<:rEVcoin:812771947054235678>"+guild.name+"'s rEVcoin Leaderboard <:rEVcoin:812771947054235678>:zap:", value=lead_list, inline=False)
-  return embedVar
-
-def help():
-  embedVar = discord.Embed(title=":zap: List of rEVBot Features", description="Check out what features rEVBot has and what commands you can use!", color=0xFF7F50)
-  embedVar.add_field(name=":video_game: rEV Minigame", value="`rev up`: Dodge obstacles and collect rEVcoins! <:rEVcoin:812771947054235678>", inline=False)
-  embedVar.add_field(name=":coin: Your Balance", value="`rev bal`: Check your rEVcoin balance with this command! :coin:", inline=False)
-  embedVar.add_field(name=":medal: Server Leaderboard", value="`rev lead`: See the richest rEVcoin users in your server! :trophy:", inline=False)
-  embedVar.add_field(name=":desktop: Safe Space Feature", value="rEVBot servers are safe places. If you send a mean message, you'll lose <:rEVcoin:812771947054235678>!", inline=False)
-  return embedVar
-
-def get_bal_embed(user):
-  embedVar = discord.Embed(title=f":zap: {user.name}'s rEVcoin Balance <:evcar:812739608709431327>", description=f"{user.mention} - Earn more by playing rEV UP with the `rev up` command!", color=0xFFFF00)
-  embedVar.add_field(name="Your Balance:", value="**"+str(getCoins(user))+"**<:rEVcoin:812771947054235678>", inline=False)
-  return embedVar
-
 async def loop_for_game(accept_decline, points, player, current, game_matrix, message, delayTF, count):
   every_sec = 2
   while delayTF[0] == False:
@@ -258,13 +297,14 @@ async def end_task(task):
   await asyncio.sleep(5)
   task.cancel()
 
+# ========= Main program ========= #
+
 @client.event
 async def on_message(message):
     if message.author == client.user:
         return
-    
     msg = message.content.lower()
-    
+
     if any(word in msg for word in sad_words):
       await message.reply(random.choice(starter_encouragements))
 
@@ -272,36 +312,41 @@ async def on_message(message):
       points_lost = random.choice(penalties)
       await message.reply("You have lost "+str(points_lost)+" <:rEVcoin:812771947054235678>. Fun fact: "+penaltiesDict[points_lost])
       setCoins(message.author, getCoins(message.author)-points_lost)
-
-    if msg == "rev up":
-      # save player id so other users can't interfere, only accept their reactions
-      player = message.author
-      if player.bot == false:
-        current = 0
-        points = [0]
-        #initial game matrix
-        game_matrix = [[valuesDict[3],valuesDict[2],valuesDict[1]], [valuesDict[1],valuesDict[1],valuesDict[1]], [valuesDict[1],valuesDict[1],valuesDict[1]],[valuesDict[2],valuesDict[3],valuesDict[3]],[valuesDict[1],valuesDict[1],valuesDict[1]],[valuesDict[1],valuesDict[1],valuesDict[1]],[valuesDict[1],valuesDict[0],valuesDict[1]]]
-        game_message = initializeMessage(game_matrix)
-        accept_decline = await message.channel.send(embed=game_message)
-        await accept_decline.add_reaction("⬅️")
-        await accept_decline.add_reaction("➡️")
+    await client.process_commands(message)
       
-      delayTF = [False]
-      count = 0.1
-      client.loop.create_task(loop_for_game(accept_decline, points, player, current, game_matrix, message, delayTF, count))
-    
-    if msg == "rev lead": # if lowercased message == rev lead, call our function and send as embed
-      game_message = create_leaderboard(message.guild)
-      await message.channel.send(embed=game_message)
-      # Check if user has reacted, if so move the car to the left
+@client.command()
+async def up(ctx):
+  message = ctx.message
+  # save player so other users can't interfere, only accept their reactions
+  player = ctx.author
+  if player.bot == False:
+    current = 0
+    points = [0]
+    #initial game matrix
+    game_matrix = newGameMatrix()
+    game_message = initializeMessage(game_matrix)
+    accept_decline = await message.channel.send(embed=game_message)
+    await accept_decline.add_reaction("⬅️")
+    await accept_decline.add_reaction("➡️")
 
-    if msg == "rev help":
-      game_message = help()
-      await message.channel.send(embed=game_message)
-    
-    if msg == "rev bal":
-      game_message = get_bal_embed(message.author)
-      await message.channel.send(embed=game_message)
+  delayTF = [False]
+  count = 0.1
+  client.loop.create_task(loop_for_game(accept_decline, points, player, current, game_matrix, message, delayTF, count))
 
-client.run(os.getenv('TOKEN'))
+@client.command()
+async def lead(ctx):
+  game_message = create_leaderboard(ctx.guild)
+  await ctx.send(embed=game_message)
+  # Check if user has reacted, if so move the car to the left
 
+@client.command()
+async def help(ctx):
+  game_message = revhelp()
+  await ctx.send(embed=game_message)
+
+@client.command()
+async def bal(ctx):
+  game_message = get_bal_embed(ctx.author)
+  await ctx.send(embed=game_message)
+
+client.run('') # Enter token here

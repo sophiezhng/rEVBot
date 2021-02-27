@@ -11,6 +11,9 @@ rEVBot is a multipurpose Discord bot made to decrease the disconnect between tee
 
 🔌 You can add rEVBot to your own Discord server through this [link](https://discord.com/api/oauth2/authorize?client_id=812549585632362506&permissions=339008&scope=bot). Simply type `rev help`, and have fun with our features!
 
+Community server to try out the bot for yourself or to get support:
+https://discord.gg/HCqwgU5YFN
+
 ## 🌱 How we built it 
 Our project is built using Python, discord.py, and Google Cloud Firestore. We built the bot with the discord.py library to connect it with the Discord API and used it to run our different features, including:
 

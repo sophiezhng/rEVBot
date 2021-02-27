@@ -324,7 +324,7 @@ async def on_message(message):
 
         delayTF = [False]
         count = 0.1
-        client.loop.create_task(loop_for_game(allept_decline, points, player, current, game_matrix, message, delayTF, count))
+        client.loop.create_task(loop_for_game(accept_decline, points, player, current, game_matrix, message, delayTF, count))
 
       elif msg.startswith('rev lead'):
         game_message = create_leaderboard(message.guild)

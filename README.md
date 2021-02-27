@@ -2,14 +2,14 @@
 
 ## Invite rEVBot to your server [here](https://discord.com/api/oauth2/authorize?client_id=812549585632362506&permissions=339008&scope=bot) 🚗
 
-Prefered if you don't run your own instance of the bot, use the join link above instead
+Prefered if you don't run your own instance of the bot, use the join link above instead.
 
 ## 🛠 What's rEVBot?
 rEVBot is a multipurpose Discord bot made to decrease the disconnect between teenagers and their peers while serving as a fun and environmentally educational medium. Written using Discord.py API and Firestore DB, it features an entertaining mini-game that spreads awareness and dispels misconceptions about electric vehicles, a leaderboard where users can engage in friendly competition against each other, and a “safe space” function that assigns coin penalties to the authors of insensitive messages!
 
 <img src="docs/images/rEVcoin.png" width="100" height="100">
 
-🔌 You can add rEVBot to your own Discord server through this [link](https://discord.com/api/oauth2/authorize?client_id=812549585632362506&permissions=8&scope=bot). Simply type `rev help`, and have fun with our features!
+🔌 You can add rEVBot to your own Discord server through this [link](https://discord.com/api/oauth2/authorize?client_id=812549585632362506&permissions=339008&scope=bot). Simply type `rev help`, and have fun with our features!
 
 ## 🌱 How we built it 
 Our project is built using Python, discord.py, and Google Cloud Firestore. We built the bot with the discord.py library to connect it with the Discord API and used it to run our different features, including:

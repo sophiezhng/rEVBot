@@ -4,17 +4,13 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 import asyncio
 
-from discord.ext import commands
-
 # ========= For Firestore (rev lead) ========= #
 
 intents = discord.Intents.default()
 intents.members = True
-client = commands.Bot(command_prefix='rev ', intents=intents)
+client = discord.Client(intents=intents)
 
-client.remove_command('help')
-
-path_to_json = "" # enter path to json certificate here to read and write to Firebase
+path_to_json = "" # enter path to json certificate here to read and write to Firestore
 cred = credentials.Certificate(path_to_json)
 firebase_admin.initialize_app(cred)
 
@@ -312,41 +308,38 @@ async def on_message(message):
       points_lost = random.choice(penalties)
       await message.reply("You have lost "+str(points_lost)+" <:rEVcoin:812771947054235678>. Fun fact: "+penaltiesDict[points_lost])
       setCoins(message.author, getCoins(message.author)-points_lost)
-    await client.process_commands(message)
       
-@client.command()
-async def up(ctx):
-  message = ctx.message
-  # save player so other users can't interfere, only accept their reactions
-  player = ctx.author
-  if player.bot == False:
-    current = 0
-    points = [0]
-    #initial game matrix
-    game_matrix = newGameMatrix()
-    game_message = initializeMessage(game_matrix)
-    accept_decline = await message.channel.send(embed=game_message)
-    await accept_decline.add_reaction("⬅️")
-    await accept_decline.add_reaction("➡️")
+    if msg.startswith('rev '):
+      if msg.startswith('rev up'):
+        player = message.author
+        if player.bot == False:
+          current = 0
+          points = [0]
+          #initial game matrix
+          game_matrix = newGameMatrix()
+          game_message = initializeMessage(game_matrix)
+          accept_decline = await message.channel.send(embed=game_message)
+          await accept_decline.add_reaction("⬅️")
+          await accept_decline.add_reaction("➡️")
 
-  delayTF = [False]
-  count = 0.1
-  client.loop.create_task(loop_for_game(accept_decline, points, player, current, game_matrix, message, delayTF, count))
+        delayTF = [False]
+        count = 0.1
+        client.loop.create_task(loop_for_game(allept_decline, points, player, current, game_matrix, message, delayTF, count))
 
-@client.command()
-async def lead(ctx):
-  game_message = create_leaderboard(ctx.guild)
-  await ctx.send(embed=game_message)
-  # Check if user has reacted, if so move the car to the left
+      elif msg.startswith('rev lead'):
+        game_message = create_leaderboard(message.guild)
+        await message.channel.send(embed=game_message)
+        # Check if user has reacted, if so move the car to the left
 
-@client.command()
-async def help(ctx):
-  game_message = revhelp()
-  await ctx.send(embed=game_message)
+      elif msg.startswith('rev help'):
+        game_message = revhelp()
+        await message.channel.send(embed=game_message)
 
-@client.command()
-async def bal(ctx):
-  game_message = get_bal_embed(ctx.author)
-  await ctx.send(embed=game_message)
-
+      elif msg.startswith('rev bal'):
+        game_message = get_bal_embed(message.author)
+        await message.channel.send(embed=game_message)
+        
+    if 'country roads' in msg:
+      await message.reply('Take me home.')
+      
 client.run('') # Enter token here

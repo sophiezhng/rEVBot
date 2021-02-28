@@ -297,6 +297,7 @@ async def end_task(task):
 
 @client.event
 async def on_message(message):
+  if message.guild is not None:
     if message.author == client.user:
         return
     msg = message.content.lower()

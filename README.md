@@ -28,6 +28,7 @@ After hitting an obstacle:
 ![rEV hit obstacle](docs/images/up-hit-obstacle.png)
 
 `rev bal`: Check user’s personal balance, stored in Firestore.
+
 ![rEVcoin Bal](docs/images/rev-bal.png)
 
 `rev lead`: Shows the top rEVcoin users in the server.
